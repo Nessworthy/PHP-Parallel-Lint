@@ -36,6 +36,7 @@ For colored output install the suggested package `jakub-onderka/php-console-high
 - `--git <git>`     Path to Git executable to show blame message (default: 'git').
 - `--stdin`         Load files and folder to test from standard input.
 - `--ignore-fails`  Ignore failed tests.
+- `--junit <file>`  Output test results as a junit XML file (in addition to normal output).
 - `-h, --help`      Print this help.
 - `-V, --version`   Display this application version.
 
