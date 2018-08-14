@@ -43,8 +43,9 @@ class JUnitOutput implements IOutput
 
     public function writeResult(Result $result, ErrorFormatter $errorFormatter, $ignoreFails)
     {
-        $this->writer->write('<checkstyle>' . PHP_EOL);
-        $errors = array();
+        $totalTests = \count($result->getCheckedFiles());
+
+        $errors = [];
 
         foreach ($result->getErrors() as $error) {
             $message = $error->getMessage();
@@ -59,26 +60,68 @@ class JUnitOutput implements IOutput
             $errors[$error->getShortFilePath()][] = array(
                 'message' => $message,
                 'line' => $line,
-                'source' => $source
+                'source' => $source,
             );
         }
 
-        foreach ($errors as $file => $fileErrors) {
-            $this->writer->write(sprintf('    <file name="%s">', $file) . PHP_EOL);
-            foreach ($fileErrors as $fileError) {
-                $this->writer->write(
-                    sprintf(
-                        '        <error line="%d" severity="ERROR" message="%s" source="%s" />',
-                        $fileError['line'],
-                        $fileError['message'],
-                        $fileError['source']
-                    ) .
-                    PHP_EOL
-                );
-            }
-            $this->writer->write('    </file>' . PHP_EOL);
+        foreach ($errors as $errorCollection) {
+            $totalTests += 1 - \count($errorCollection);
         }
 
-        $this->writer->write('</checkstyle>' . PHP_EOL);
+        $this->writer->write(sprintf(
+            '<testsuites name="%s" tests="%s" failures="%s" time="%s">' . PHP_EOL,
+            'PHP Parallel Lint Tests',
+            $totalTests,
+            $result->getErrorCount(),
+            $result->getTestTime()
+        ));
+
+        foreach ($result->getCheckedFiles() as $checkedFile) {
+
+            $errorCount = 0;
+
+            $fileErrors = $errors[$checkedFile] ?? null;
+
+            if ($fileErrors) {
+                $errorCount = \count($errors[$checkedFile]);
+            }
+
+            $this->writer->write(sprintf(
+                '<testsuite name="%s" tests="%d" failures="%d">' . PHP_EOL,
+                $checkedFile,
+                1,
+                $errorCount,
+                $result->getTestTime()
+            ));
+
+            if ($fileErrors) {
+                foreach ($fileErrors as $error) {
+                    $this->writer->write(sprintf(
+                        '<testcase name="%s" file="%s">' . PHP_EOL,
+                        'PHP Lint Check',
+                        $checkedFile
+                    ));
+
+                    $this->writer->write(sprintf(
+                        '<failure type="%s" message="%s"/>' . PHP_EOL,
+                        $error['source'],
+                        $error['message']
+                    ));
+
+                    $this->writer->write('</testcase>' . PHP_EOL);
+                }
+            } else {
+                $this->writer->write(sprintf(
+                    '<testcase name="%s" file="%s" />' . PHP_EOL,
+                    'PHP Lint Check',
+                    $checkedFile
+                ));
+            }
+
+
+            $this->writer->write('</testsuite>' . PHP_EOL);
+        }
+
+        $this->writer->write('</testsuites>' . PHP_EOL);
     }
 }
