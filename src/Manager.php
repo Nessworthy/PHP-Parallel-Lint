@@ -33,11 +33,14 @@ either expressed or implied, of the FreeBSD Project.
 use JakubOnderka\PhpParallelLint\Output\CheckstyleOutput;
 use JakubOnderka\PhpParallelLint\Output\IOutput;
 use JakubOnderka\PhpParallelLint\Output\JSONOutput;
+use JakubOnderka\PhpParallelLint\Output\JUnitOutput;
+use JakubOnderka\PhpParallelLint\Output\MultiOutput;
 use JakubOnderka\PhpParallelLint\Output\TextOutput;
 use JakubOnderka\PhpParallelLint\Output\TextOutputColored;
 use JakubOnderka\PhpParallelLint\Process\GitBlameProcess;
 use JakubOnderka\PhpParallelLint\Process\PhpExecutable;
 use JakubOnderka\PhpParallelLint\Writer\ConsoleWriter;
+use JakubOnderka\PhpParallelLint\Writer\StreamWriter;
 
 class Manager
 {
@@ -112,18 +115,28 @@ class Manager
         $writer = new ConsoleWriter;
         switch ($settings->format) {
             case Settings::FORMAT_JSON:
-                return new JSONOutput($writer);
+                $output = new JSONOutput($writer);
+                break;
             case Settings::FORMAT_CHECKSTYLE:
-                return new CheckstyleOutput($writer);
+                $output = new CheckstyleOutput($writer);
+                break;
+            case Settings::FORMAT_TEXT:
+            default:
+                if ($settings->colors === Settings::DISABLED) {
+                    $output = new TextOutput($writer);
+                } else {
+                    $output = new TextOutputColored($writer, $settings->colors);
+                }
+
+                $output->showProgress = $settings->showProgress;
         }
 
-        if ($settings->colors === Settings::DISABLED) {
-            $output = new TextOutput($writer);
-        } else {
-            $output = new TextOutputColored($writer, $settings->colors);
+        if ($settings->junitReportPath) {
+            $fileStream = fopen($settings->junitReportPath, 'wb+');
+            $writer = new StreamWriter($fileStream);
+            $junitOutput = new JUnitOutput($writer);
+            $output = new MultiOutput($output, $junitOutput);
         }
-
-        $output->showProgress = $settings->showProgress;
 
         return $output;
     }

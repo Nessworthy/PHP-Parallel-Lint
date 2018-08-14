@@ -128,6 +128,11 @@ class Settings
     public $ignoreFails = false;
 
     /**
+     * @var string|false
+     */
+    public $junitReportPath = false;
+
+    /**
      * @param array $paths
      */
     public function addPaths(array $paths)
@@ -210,6 +215,10 @@ class Settings
 
                     case '--ignore-fails':
                         $settings->ignoreFails = true;
+                        break;
+
+                    case '--junit':
+                        $settings->junitReportPath = $arguments->getNext();
                         break;
 
                     default:

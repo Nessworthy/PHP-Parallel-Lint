@@ -37,6 +37,7 @@ Options:
     --git <git>     Path to Git executable to show blame message (default: 'git').
     --stdin         Load files and folder to test from standard input.
     --ignore-fails  Ignore failed tests.
+    --junit <file>  Create a JUnit report for the run.
     -h, --help      Print this help.
     -V, --version   Display this application version
 <?php

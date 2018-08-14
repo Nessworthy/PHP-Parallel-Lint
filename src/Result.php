@@ -66,6 +66,11 @@ class Result implements \JsonSerializable
         return $this->errors;
     }
 
+    public function getErrorCount()
+    {
+        return \count($this->errors);
+    }
+
     /**
      * @return bool
      */
