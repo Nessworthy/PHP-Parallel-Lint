@@ -21,6 +21,9 @@
         }
     ],
     "autoload": {
+        "PSR-4": {
+            "JakubOnderka\\PhpParallelLint\\":"src/"
+        },
         "classmap": [
             "./"
         ]

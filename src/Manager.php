@@ -30,12 +30,18 @@ of the authors and should not be interpreted as representing official policies,
 either expressed or implied, of the FreeBSD Project.
  */
 
+use JakubOnderka\PhpParallelLint\Output\CheckstyleOutput;
+use JakubOnderka\PhpParallelLint\Output\IOutput;
+use JakubOnderka\PhpParallelLint\Output\JSONOutput;
+use JakubOnderka\PhpParallelLint\Output\TextOutput;
+use JakubOnderka\PhpParallelLint\Output\TextOutputColored;
 use JakubOnderka\PhpParallelLint\Process\GitBlameProcess;
 use JakubOnderka\PhpParallelLint\Process\PhpExecutable;
+use JakubOnderka\PhpParallelLint\Writer\ConsoleWriter;
 
 class Manager
 {
-    /** @var Output */
+    /** @var IOutput */
     protected $output;
 
     /**
@@ -90,23 +96,23 @@ class Manager
     }
 
     /**
-     * @param Output $output
+     * @param IOutput $output
      */
-    public function setOutput(Output $output)
+    public function setOutput(IOutput $output)
     {
         $this->output = $output;
     }
 
     /**
      * @param Settings $settings
-     * @return Output
+     * @return IOutput
      */
     protected function getDefaultOutput(Settings $settings)
     {
         $writer = new ConsoleWriter;
         switch ($settings->format) {
             case Settings::FORMAT_JSON:
-                return new JsonOutput($writer);
+                return new JSONOutput($writer);
             case Settings::FORMAT_CHECKSTYLE:
                 return new CheckstyleOutput($writer);
         }
